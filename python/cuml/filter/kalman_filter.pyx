@@ -532,3 +532,8 @@ class KalmanFilter(Base):
 
         else:
             super(KalmanFilter, self).__setattr__(name, value)
+
+    def get_param_names(self):
+        """Scikit-learn style function that returns parameters's names.
+        """
+        return [attr for attr in vars(self) if not attr.startswith("__")]

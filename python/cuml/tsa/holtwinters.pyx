@@ -549,3 +549,8 @@ class ExponentialSmoothing(Base):
                     return cudf.Series(self.season[index])
         else:
             raise ValueError("Fit() the model to get season values")
+
+    def get_param_names(self):
+        """Scikit-learn style function that returns parameters's names.
+        """
+        return [attr for attr in vars(self) if not attr.startswith("__")]
