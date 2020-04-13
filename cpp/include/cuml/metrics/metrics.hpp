@@ -182,6 +182,25 @@ double mutualInfoScore(const cumlHandle &handle, const int *y, const int *y_hat,
                        const int upper_class_range);
 
 /**
+* Build the Contingency matrix between two clusters
+*
+* Contingency describe the relationship between labels.
+*
+* @param handle: cumlHandle
+* @param out_mat: Pointer to the allocated memory of the output matrix
+* @param y: Array of response variables of the first clustering classifications
+* @param y_hat: Array of response variables of the second clustering classifications
+* @param n: Number of elements in y and y_hat
+* @param lower_class_range: the lowest value in the range of classes
+* @param upper_class_range: the highest value in the range of classes
+*/
+void contingencyMatrix(const cumlHandle &handle,
+                       int *out_mat,
+                       const int *y, const int *y_hat,
+                       const int n, const int lower_class_range,
+                       const int upper_class_range);
+
+/**
 * Calculates the "homogeneity score" between two clusters
 *
 * A clustering result satisfies homogeneity if all of its clusters

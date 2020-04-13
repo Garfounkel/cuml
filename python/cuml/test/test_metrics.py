@@ -23,6 +23,7 @@ import pytest
 from cuml.ensemble import RandomForestClassifier as curfc
 from cuml.metrics.cluster import adjusted_rand_score as cu_ars
 from cuml.metrics import accuracy_score as cu_acc_score
+from cuml.metrics import contingency_matrix
 from cuml.test.utils import get_handle, get_pattern, array_equal, \
     unit_param, quality_param, stress_param, generate_random_labels
 
@@ -34,6 +35,7 @@ from sklearn.metrics import accuracy_score as sk_acc_score
 from sklearn.metrics.cluster import adjusted_rand_score as sk_ars
 from cuml.metrics.cluster import entropy
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics.cluster import contingency_matrix as sk_contingency_matrix
 
 from cuml.metrics.regression import mean_squared_error, \
     mean_squared_log_error, mean_absolute_error
@@ -333,3 +335,22 @@ def test_entropy_random(n_samples, base, use_handle):
     S = entropy(np.array(clustering, dtype=np.int32), base, handle=handle)
 
     assert_almost_equal(S, sp_S, decimal=2)
+
+
+@pytest.mark.parametrize('use_handle', [True, False])
+@pytest.mark.parametrize('input_range', [[0, 100],
+                                         # [-1000, 1000],
+                                         [0, 2000]
+                                         ])
+def test_contingency_matrix(use_handle, input_range):
+    a, b = generate_random_labels(lambda rng: rng.randint(*input_range,
+                                                          int(10e3),
+                                                          dtype=np.int32))
+    handle, stream = get_handle(use_handle)
+    ary = contingency_matrix(a, b, handle)
+    # TODO: fix -> print(ary.to_output('cupy'))
+    ref = sk_contingency_matrix(a, b)
+    ary = np.frombuffer(ary.to_host_array(), dtype=np.int32)
+    ary = np.reshape(ary, newshape=ref.shape)
+    print(ary.sum())
+    np.testing.assert_array_almost_equal(ary, ref, decimal=4)

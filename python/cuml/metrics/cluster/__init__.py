@@ -16,3 +16,4 @@
 
 from cuml.metrics.cluster.adjustedrandindex import adjusted_rand_score
 from cuml.metrics.cluster.entropy import cython_entropy as entropy
+from cuml.metrics.cluster.contingency import contingency_matrix

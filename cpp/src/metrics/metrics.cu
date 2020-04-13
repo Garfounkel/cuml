@@ -95,6 +95,19 @@ double mutualInfoScore(const cumlHandle &handle, const int *y, const int *y_hat,
     handle.getDeviceAllocator(), handle.getStream());
 }
 
+
+void contingencyMatrix(const cumlHandle &handle,
+                       int *out_mat,
+                       const int *y, const int *y_hat,
+                       const int n, const int lower_class_range,
+                       const int upper_class_range) {
+  MLCommon::Metrics::contingencyMatrix(
+    y, y_hat, n, out_mat,
+    lower_class_range, upper_class_range,
+    handle.getDeviceAllocator(), handle.getStream());
+}
+
+
 double homogeneityScore(const cumlHandle &handle, const int *y,
                         const int *y_hat, const int n,
                         const int lower_class_range,

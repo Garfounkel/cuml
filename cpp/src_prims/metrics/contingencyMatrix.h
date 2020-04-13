@@ -22,6 +22,9 @@
 #include <cub/cub.cuh>
 #include "cuda_utils.h"
 
+#include <cuml/common/cuml_allocator.hpp>
+#include "common/device_buffer.hpp"
+
 namespace MLCommon {
 namespace Metrics {
 
@@ -307,6 +310,36 @@ void contingencyMatrix(const T *groundTruth, const T *predictedLabel,
                              stream);
       break;
   }
+}
+
+/**
+ * @brief contruct contingency matrix given input ground truth and prediction labels.
+ * Helper function that allocate workspace automatically before calling contingency matrix.
+ * @param groundTruth: device 1-d array for ground truth (num of rows)
+ * @param predictedLabel: device 1-d array for prediction (num of columns)
+ * @param nSamples: number of elements in input array
+ * @param outMat: output buffer for contingecy matrix
+ * @param minLabel: Optional, min value in input ground truth array
+ * @param maxLabel: Optional, max value in input ground truth array
+ * @param stream: cuda stream for execution
+ * @param allocator: object that takes care of temporary device memory allocation of type std::shared_ptr<MLCommon::deviceAllocator>
+ */
+template <typename T>
+void contingencyMatrix(const T *groundTruth, const T *predictedLabel,
+                       const int nSamples, int *outMat,
+                       T minLabel, T maxLabel,
+                       std::shared_ptr<MLCommon::deviceAllocator> allocator,
+                       cudaStream_t stream) {
+
+  //workspace allocation
+  size_t workspaceSz = MLCommon::Metrics::getContingencyMatrixWorkspaceSize(
+    nSamples, groundTruth, stream, minLabel, maxLabel);
+  device_buffer<char> pWorkspace(allocator, stream, workspaceSz);
+
+  contingencyMatrix(
+    groundTruth, predictedLabel, (int)nSamples,
+    outMat, stream, (void *)pWorkspace.data(),
+    workspaceSz, minLabel, maxLabel);
 }
 };  // namespace Metrics
 };  // namespace MLCommon
